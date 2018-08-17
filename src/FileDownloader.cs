@@ -19,7 +19,10 @@ namespace FileDownloader
     public class FileDownloader : IFileDownloader
     {
         private readonly IDownloadCache downloadCache;
-        private readonly ILogger logger = LoggerFacade.GetCurrentClassLogger();
+        /// <summary>
+        /// 
+        /// </summary>
+        public ILogger logger = LoggerFacade.GetCurrentClassLogger();
         private readonly ManualResetEvent readyToDownload = new ManualResetEvent(true);
         private readonly System.Timers.Timer attemptTimer = new System.Timers.Timer();
         private readonly object cancelSync = new object();
@@ -38,6 +41,11 @@ namespace FileDownloader
         private Uri fileSource;
         private StreamCopyWorker worker;
         private DownloadWebClient downloadWebClient;
+
+        /// <summary>
+        /// Optionally set credentials of downloader
+        /// </summary>
+        public ICredentials Credentials { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FileDownloader"/> class. No download cache would be used, resume is not supported
@@ -329,6 +337,11 @@ namespace FileDownloader
             webClient.DownloadFileCompleted += OnDownloadCompleted;
             webClient.DownloadProgressChanged += OnDownloadProgressChanged;
             webClient.OpenReadCompleted += OnOpenReadCompleted;
+
+            if (Credentials != null)
+            {
+                webClient.Credentials = Credentials;
+            }
             return webClient;
         }
 
